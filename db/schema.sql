@@ -6,10 +6,10 @@ USE employeeTracker_db;
 
 CREATE TABLE department (
   id INT NOT NULL auto_increment primary key,
-  name VARCHAR(30) NOT NULL
+  names VARCHAR(30) NOT NULL
 );
 
-CREATE TABLE role (
+CREATE TABLE roles (
   id INT NOT NULL auto_increment primary key,
   title VARCHAR(30) NOT NULL
   salary DECIMAL NOT NULL
