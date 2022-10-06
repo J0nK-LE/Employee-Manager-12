@@ -21,6 +21,6 @@ CREATE TABLE employees (
   firstName VARCHAR(30) NOT NULL,
   lastName VARCHAR(30) NOT NULL,
   role_id INT NOT NULL,
-  manager_id INT NOT NULL
+  manager_id INT NULL
 );
 

@@ -1,17 +1,17 @@
 insert into employees(firstName,lastName,role_id,manager_id) 
 values 
 
-('Diane','Murphy','2','1'),
+('Diane','Murphy','1',''),
 
-('Mary','Patterson','1','1'),
+('Mary','Patterson','2','1'),
 
 ('Jeff', 'Firrelli','3','1'),
 
-('William','Patterson','4','6'),
+('William','Patterson','4','1'),
 
-('Gerard', 'Bondur','5','4'),
+('Gerard', 'Bondur','5','1'),
 
-('George','Vanauf','6','4'),
+('George','Vanauf','6','1'),
 
 
 insert into department(names)
