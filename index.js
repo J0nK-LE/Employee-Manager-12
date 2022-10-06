@@ -4,6 +4,7 @@ let inquirer = require("inquirer");
 
 let connection
 
+
 const test = [
   //   {
   //    type: 'input',
@@ -32,7 +33,7 @@ const addDepartments = [{
   name: 'departmentName'
 }]
 
-const addRole = [{
+const addRoles = [{
   type: 'input',
   message: 'Name of the role you want to add?',
   name: 'roleName'
@@ -46,10 +47,11 @@ const addRole = [{
   type: 'list',
   message: 'Which department does this role belong to?',
   name: 'roleDepartment',
-  choices: ['LIST OF DEPARTMENT ROLES GO HERE']
-},]
-
-const addEmployee = [{
+  choices: ["one", "two"]
+},
+]
+// await departmentRoles()
+const addEmployees = [{
   type: 'input',
   message: 'First name of the employee you want to add?',
   name: 'empFirstName'
@@ -59,20 +61,21 @@ const addEmployee = [{
   message: 'Last name of the employee you want to add?',
   name: 'empLastName'
 },
-{
-  type: 'input',
-  message: 'What is the employees role?',
-  name: 'empRole',
-  choices: ['LIST OF ROLES GO HERE']
-},
-{
-  type: 'list',
-  message: 'Who is the employees manager?',
-  name: 'empManager',
-  choices: ['LIST OF MANAGERS GO HERE']
-}]
+// {
+//   type: 'list',
+//   message: 'What is the employees role?',
+//   name: 'empRole',
+//   choices: ['LIST OF ROLES GO HERE']
+// },
+// {
+//   type: 'list',
+//   message: 'Who is the employees manager?',
+//   name: 'empManager',
+//   choices: ['LIST OF MANAGERS GO HERE']
+// }
+]
 
-const updateRole = [{
+const updateRoles = [{
   type: 'list',
   message: 'Which department does this role belong to?',
   name: 'roleDepartment',
@@ -174,25 +177,60 @@ async function viewEmployees() {
 
 async function addDepartment(){
   const departmentAnswer = await inquirer.prompt(addDepartments)
-  let newDepartment = departmentAnswer.departmentName
-  const [departmentAdded] = await connection.execute(`INSERT INTO department(names) VALUES ('${newDepartment}');select * From department`);
-  console.table(departmentAdded)
+  
+  const newDepartment = departmentAnswer.departmentName
+  
+  await connection.execute(`INSERT INTO department(names) VALUES ('${newDepartment}');`)
+
+  console.log(`${newDepartment} department added!`)
   
   main()
 }
 
-// async function addRole(){
-
-//   main()
-// }
-
-// async function addEmployee(){
-
-//   main()
-// }
-
-// async function updateRole(){
+async function addRole(){
+  const addRoleAnswers = await inquirer.prompt(addRoles)
   
-//   main()
-// }
+  const roleName = addRoleAnswers.roleName
+  const roleSalary = addRoleAnswers.roleSalary
+  // const roleDepartment = addRoleAnswers.roleDepartment
+
+  
+  await connection.execute(`INSERT INTO roles(title) VALUES ('${roleName}');`)
+  await connection.execute(`INSERT INTO roles(salary) VALUES ('${roleSalary}');`)
+  await connection.execute(`INSERT INTO roles(department_id) VALUES ('${roleDepartment}');`)
+
+  console.log(`${roleName} role added!`)
+
+  main()
+}
+
+const departmentRoles = async () => {
+  const departments = await connection.execute(`SELECT names FROM department;`)
+  
+  console.log(JSON.stringify(departments[0]))
+
+};
+
+async function addEmployee(){
+  const addEmpAnswers = await inquirer.prompt(addEmployees)
+  
+  const empFirstName = addEmpAnswers.empFirstName
+  const empLastName = addEmpAnswers.empLastName
+  // const empRole = addEmpAnswers.empRole
+  // const empManager = addEmpAnswers.empManager
+
+  
+  await connection.execute(`INSERT INTO employees(firstName) VALUES ('${empFirstName}');`)
+  await connection.execute(`INSERT INTO employees(lastName) VALUES ('${empLastName}');`)
+  // await connection.execute(`INSERT INTO employees(empRole) VALUES ('${roleDepartment}');`)
+  // await connection.execute(`INSERT INTO employees(empManager) VALUES ('${roleDepartment}');`)
+
+  console.log(`${roleName} role added!`)
+  main()
+}
+
+async function updateRole(){
+  departmentRoles()
+  main()
+}
 
