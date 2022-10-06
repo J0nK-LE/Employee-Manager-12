@@ -11,7 +11,7 @@ values
 
 ('Gerard', 'Bondur','5','1'),
 
-('George','Vanauf','6','1'),
+('George','Vanauf','6','1');
 
 
 insert into department(names)
