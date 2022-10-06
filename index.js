@@ -4,84 +4,6 @@ let inquirer = require("inquirer");
 
 let connection
 
-
-const test = [
-  //   {
-  //    type: 'input',
-  //    message: "write what you need",
-  //    name: 'first_name'
-  // },
-  {
-    type: 'list',
-    message: "write what you need",
-    name: 'testMenuOptions',
-    choices: ['view all departments', 'view all roles', 'view all employees', 'add a department', 'add a role', 'add an employee', 'update employee role', "I'm finished"]
-  }
-]
-
-const menuQuestion = [{
-  type: 'list',
-  message: 'What would you like to do?',
-  name: 'menuOptions',
-  choices: ['view all departments', 'view all roles', 'view all employees', 'add a department', 'add a role', 'add an employee', 'update employee role', "I'm finished"]
-}]
-
-
-const addDepartments = [{
-  type: 'input',
-  message: 'Name of the department you want to add?',
-  name: 'departmentName'
-}]
-
-const addRoles = [{
-  type: 'input',
-  message: 'Name of the role you want to add?',
-  name: 'roleName'
-},
-{
-  type: 'input',
-  message: 'What is the salary of the new role?',
-  name: 'roleSalary'
-},
-{
-  type: 'list',
-  message: 'Which department does this role belong to?',
-  name: 'roleDepartment',
-  choices: ["one", "two"]
-},
-]
-// await departmentRoles()
-const addEmployees = [{
-  type: 'input',
-  message: 'First name of the employee you want to add?',
-  name: 'empFirstName'
-},
-{
-  type: 'input',
-  message: 'Last name of the employee you want to add?',
-  name: 'empLastName'
-},
-// {
-//   type: 'list',
-//   message: 'What is the employees role?',
-//   name: 'empRole',
-//   choices: ['LIST OF ROLES GO HERE']
-// },
-// {
-//   type: 'list',
-//   message: 'Who is the employees manager?',
-//   name: 'empManager',
-//   choices: ['LIST OF MANAGERS GO HERE']
-// }
-]
-
-const updateRoles = [{
-  type: 'list',
-  message: 'Which department does this role belong to?',
-  name: 'roleDepartment',
-  choices: ['LIST OF DEPARTMENT ROLES GO HERE']
-}]
-
 start();
 initialize();
 main();
@@ -106,9 +28,9 @@ function start() {
   | |______|_| |_| |_| .__/|_|\\_____/\\____,  |\\___|\\___|   |
   |                  |_|              |_____/              |
   |     __  __                                             |
-  |    |  \\/  | ___ _ _ __   ___ _  __ __   ___  _ __      |
-  |   | |\\/| |/  _' | '__ \\ /  _' |/ _'  |/ _  \\/ __|      |
-  |  | |  | |  ( | | |  | |  ( | | ( |  |  ___/  |         |
+  |    |  \\/  | __ _ _ __   ___ _  __ __   ___  _ __       |
+  |   | |\\/| |/  _' |'__ \\ /  _' |/ _'  |/ _  \\/ __|       |
+  |  | |  | |  ( | | |  | |  ( | | ( |  |  ___/ |          |
   | |_|  |_|\\__,__|_|  |_|\\__,__|\\__,  |\\___|___|          |
   |                                |__/                    |
   '--------------------------------------------------------'`)
@@ -116,9 +38,14 @@ function start() {
 
 async function main() {
   
+  const menuQuestion = [{
+    type: 'list',
+    message: 'What would you like to do?',
+    name: 'menuOptions',
+    choices: ['view all departments', 'view all roles', 'view all employees', 'add a department', 'add a role', 'add an employee', 'update employee role', "I'm finished"]
+  }]
   const menuAnswer = await inquirer.prompt(menuQuestion)
-
-  console.log(menuAnswer.menuOptions)
+  // console.log(menuAnswer.menuOptions)
 
 
  
@@ -148,16 +75,11 @@ async function main() {
 
       break;
   }
-
-
-
-
-
-
 }
 
 
 async function viewDepartments() {
+  
   const [departments] = await connection.execute(`SELECT * FROM department`);
   console.table(departments);
   await main()
@@ -176,6 +98,11 @@ async function viewEmployees() {
 }
 
 async function addDepartment(){
+  const addDepartments = [{
+    type: 'input',
+    message: 'Name of the department you want to add?',
+    name: 'departmentName'
+  }]
   const departmentAnswer = await inquirer.prompt(addDepartments)
   
   const newDepartment = departmentAnswer.departmentName
@@ -188,49 +115,104 @@ async function addDepartment(){
 }
 
 async function addRole(){
-  const addRoleAnswers = await inquirer.prompt(addRoles)
+  try {
+    
+    const [departments] = await connection.execute(`SELECT * FROM department;`)
   
-  const roleName = addRoleAnswers.roleName
-  const roleSalary = addRoleAnswers.roleSalary
-  // const roleDepartment = addRoleAnswers.roleDepartment
+    const addRoles = [{
+      type: 'input',
+      message: 'Name of the role you want to add?',
+      name: 'roleName'
+    },
+    {
+      type: 'input',
+      message: 'What is the salary of the new role?',
+      name: 'roleSalary'
+    },
+    {
+      type: 'list',
+      message: 'Which department does this role belong to?',
+      name: 'roleDepartment',
+      choices: departments.map(department => ({
+        name:department.names, value:department.id
+      }))
+    },
+    ]
 
+    const addRoleAnswers = await inquirer.prompt(addRoles)
+    
+    const roleName = addRoleAnswers.roleName
+    const roleSalary = addRoleAnswers.roleSalary
+    const roleDepartment = addRoleAnswers.roleDepartment
   
-  await connection.execute(`INSERT INTO roles(title) VALUES ('${roleName}');`)
-  await connection.execute(`INSERT INTO roles(salary) VALUES ('${roleSalary}');`)
-  await connection.execute(`INSERT INTO roles(department_id) VALUES ('${roleDepartment}');`)
+    
+    await connection.execute(`INSERT INTO roles(title, salary, department_id) VALUES (?,?,?);`, [roleName,roleSalary,roleDepartment])
 
-  console.log(`${roleName} role added!`)
-
-  main()
+    console.log(`${roleName} role added!`)
+  
+    main()
+  } catch (error) {
+    console.log(error)
+  }
 }
 
-const departmentRoles = async () => {
-  const departments = await connection.execute(`SELECT names FROM department;`)
-  
-  console.log(JSON.stringify(departments[0]))
-
-};
 
 async function addEmployee(){
+
+
+  try {
+    const [roles] = await connection.execute(`SELECT * FROM roles;`)
+    const [employees] = await connection.execute(`SELECT * FROM employees;`)
+
+    
+    const addEmployees = [{
+      type: 'input',
+      message: 'First name of the employee you want to add?',
+      name: 'empFirstName'
+    },
+  {
+    type: 'input',
+    message: 'Last name of the employee you want to add?',
+    name: 'empLastName'
+  },
+  {
+      type: 'list',
+    message: 'What is the employees role?',
+    name: 'empRole',
+    choices: roles.map(role => ({
+      name:role.title, value:role.id}))
+  },
+  {
+    type: 'list',
+    message: 'Who is the employees manager?',
+    name: 'empManager',
+    choices: employees.map(employee => ({
+      name:employee.firstName, value:employee.id}))
+  }
+]
   const addEmpAnswers = await inquirer.prompt(addEmployees)
   
   const empFirstName = addEmpAnswers.empFirstName
   const empLastName = addEmpAnswers.empLastName
-  // const empRole = addEmpAnswers.empRole
-  // const empManager = addEmpAnswers.empManager
-
+  const empRole = addEmpAnswers.empRole
+  const empManager = addEmpAnswers.empManager
   
-  await connection.execute(`INSERT INTO employees(firstName) VALUES ('${empFirstName}');`)
-  await connection.execute(`INSERT INTO employees(lastName) VALUES ('${empLastName}');`)
-  // await connection.execute(`INSERT INTO employees(empRole) VALUES ('${roleDepartment}');`)
-  // await connection.execute(`INSERT INTO employees(empManager) VALUES ('${roleDepartment}');`)
+  await connection.execute(`INSERT INTO employees(firstName, lastName, role_id, manager_id) VALUES (?,?,?,?);`, [empFirstName,empLastName,empRole,empManager])
 
-  console.log(`${roleName} role added!`)
+  console.log(`${empFirstName} ${empLastName} role added!`)
   main()
+} catch (error) {
+  console.log(error)
+}
 }
 
 async function updateRole(){
-  departmentRoles()
+  const updateRoles = [{
+    type: 'list',
+    message: 'Which department does this role belong to?',
+    name: 'roleDepartment',
+    choices: ['LIST OF DEPARTMENT ROLES GO HERE']
+  }]
   main()
 }
 
