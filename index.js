@@ -72,7 +72,7 @@ async function main() {
       updateRole()
       break;
     default:
-
+      process.exit()
       break;
   }
 }
@@ -187,7 +187,7 @@ async function addEmployee(){
     message: 'Who is the employees manager?',
     name: 'empManager',
     choices: employees.map(employee => ({
-      name:employee.firstName, value:employee.id}))
+      name: (employee.firstName + " " + employee.lastName), value:employee.id}))
   }
 ]
   const addEmpAnswers = await inquirer.prompt(addEmployees)
@@ -207,12 +207,41 @@ async function addEmployee(){
 }
 
 async function updateRole(){
-  const updateRoles = [{
-    type: 'list',
-    message: 'Which department does this role belong to?',
-    name: 'roleDepartment',
-    choices: ['LIST OF DEPARTMENT ROLES GO HERE']
-  }]
-  main()
+  try {
+    const [roles] = await connection.execute(`SELECT * FROM roles;`)
+    const [employees] = await connection.execute(`SELECT * FROM employees;`)
+
+    
+    const updateRoles = [{
+      type: 'list',
+      message: 'Which employee would you like to update?',
+      name: 'employeeEdit',
+      choices: employees.map(employee => ({
+        name: (employee.firstName + " " + employee.lastName), value:employee.id}))
+    },
+    {
+      type: 'list',
+      message: 'What is their new role?',
+      name: 'newRole',
+      choices: roles.map(role => ({
+        name:role.title, value:role.id}))
+    }]
+
+    const roleUpdateAnswers = await inquirer.prompt(updateRoles)
+  
+    
+    const employeeEdit = roleUpdateAnswers.employeeEdit
+    const newRole = roleUpdateAnswers.newRole
+    // console.log(employeeEdit)
+    // console.log(newRole)
+    
+    await connection.execute(`UPDATE employees SET role_id = (?) WHERE id=(?) ;`, [newRole,employeeEdit])
+  
+    console.log(`Role updated!`)
+
+    main()
+  } catch (error) {
+    console.log(error)
+  }
 }
 
